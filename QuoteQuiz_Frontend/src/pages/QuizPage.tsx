@@ -92,6 +92,14 @@ function QuizCard({
   onNext: () => void
 }) {
   const isBinary = question.mode === 0
+  const noText = !question.quoteText || question.quoteText.trim() === ''
+  if (noText) {
+    return (
+      <div>
+        <p className="muted" style={{ margin: 0, textAlign: 'center' }}>No quiz available</p>
+      </div>
+    )
+  }
   return (
     <div>
       <h2 style={{ margin: 0 }}>Who said it</h2>

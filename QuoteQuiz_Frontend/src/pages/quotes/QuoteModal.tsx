@@ -40,17 +40,22 @@ function CreateQuoteModal({ open, onClose, onSubmitCreate }: CreateProps) {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
-    reset
+    formState: { errors, isSubmitting, isValid },
+    reset,
+    trigger
   } = useForm<CreateFormValues>({
-    resolver: yupResolver(schema),
-    mode: 'onBlur',
+    resolver: yupResolver(schema, { abortEarly: false }),
+    mode: 'onChange',
     reValidateMode: 'onChange',
+    criteriaMode: 'all',
     defaultValues: { Text: '', Author: '' }
   })
 
   useEffect(() => {
-    if (open) reset({ Text: '', Author: '' })
+    if (open) {
+      reset({ Text: '', Author: '' })
+      trigger()
+    }
   }, [open, reset])
 
   return (
@@ -77,7 +82,7 @@ function CreateQuoteModal({ open, onClose, onSubmitCreate }: CreateProps) {
             <button type="button" className="secondary-button" onClick={onClose}>
               Cancel
             </button>
-            <button className="primary-button" type="submit" disabled={isSubmitting}>
+            <button className="primary-button" type="submit" disabled={!isValid || isSubmitting}>
               {isSubmitting ? 'Saving…' : 'Save'}
             </button>
           </div>
@@ -95,17 +100,20 @@ function EditQuoteModal({ initialQuote, onClose, onSubmitEdit }: EditProps) {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
-    reset
+    formState: { errors, isSubmitting, isValid },
+    reset,
+    trigger: triggerEdit
   } = useForm<UpdateFormValues>({
-    resolver: yupResolver(schema),
-    mode: 'onBlur',
+    resolver: yupResolver(schema, { abortEarly: false }),
+    mode: 'onChange',
     reValidateMode: 'onChange',
+    criteriaMode: 'all',
     defaultValues: { Text: initialQuote.text, Author: initialQuote.author }
   })
 
   useEffect(() => {
     reset({ Text: initialQuote.text, Author: initialQuote.author })
+    triggerEdit()
   }, [initialQuote, reset])
 
   return (
@@ -132,7 +140,7 @@ function EditQuoteModal({ initialQuote, onClose, onSubmitEdit }: EditProps) {
             <button type="button" className="secondary-button" onClick={onClose}>
               Cancel
             </button>
-            <button className="primary-button" type="submit" disabled={isSubmitting}>
+            <button className="primary-button" type="submit" disabled={!isValid || isSubmitting}>
               {isSubmitting ? 'Saving…' : 'Save'}
             </button>
           </div>

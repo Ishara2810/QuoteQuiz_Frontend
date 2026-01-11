@@ -111,44 +111,9 @@ export default function LoginPage() {
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? (
-                  // Eye with slash (hide)
-                  <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-                    <path
-                      d="M3 3l18 18"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-                    <path
-                      d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7c-1.74 0-3.37-.43-4.86-1.18"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M9.88 9.88A3 3 0 0012 15a3 3 0 002.12-.88"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+                  <i className="fa-solid fa-eye-slash" aria-hidden="true"></i>
                 ) : (
-                  // Eye (show)
-                  <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-                    <path
-                      d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <circle cx="12" cy="12" r="3" fill="currentColor" />
-                  </svg>
+                  <i className="fa-regular fa-eye" aria-hidden="true"></i>
                 )}
               </button>
             </div>
@@ -171,10 +136,6 @@ export default function LoginPage() {
             {(loginMutation.error as Error)?.message || 'Login failed'}
           </div>
         )}
-
-        <p className="muted">
-          Don’t have an account? <a className="subtle-link" href="#">Create one</a>
-        </p>
       </div>
     </div>
   )

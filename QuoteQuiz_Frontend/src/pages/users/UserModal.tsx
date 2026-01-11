@@ -72,12 +72,14 @@ function CreateUserModal({ open, onClose, onSubmitCreate, roles }: CreateProps) 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
-    reset
+    formState: { errors, isSubmitting, isValid },
+    reset,
+    trigger
   } = useForm<CreateFormValues>({
-    resolver: yupResolver(createSchema),
-    mode: 'onBlur',
+    resolver: yupResolver(createSchema, { abortEarly: false }),
+    mode: 'onChange',
     reValidateMode: 'onChange',
+    criteriaMode: 'all',
     defaultValues: {
       FirstName: '',
       LastName: '',
@@ -96,15 +98,17 @@ function CreateUserModal({ open, onClose, onSubmitCreate, roles }: CreateProps) 
         LastName: '',
         Email: '',
         Password: '',
+        ConfirmPassword: '',
         RoleId: roles[0]?.id ?? '',
         IsActive: true
       })
+      trigger()
     }
   }, [open])
 
   return (
     <div className="modal-backdrop" role="dialog" aria-modal="true">
-      <div className="modal">
+      <div className="modal modal--wide">
 				<button
 					type="button"
 					className="modal-close"
@@ -121,43 +125,45 @@ function CreateUserModal({ open, onClose, onSubmitCreate, roles }: CreateProps) 
           noValidate
           onSubmit={handleSubmit((values) => onSubmitCreate(values))}
         >
-          <div className="form-row">
-            <label htmlFor="create-firstName">First name</label>
-            <input id="create-firstName" className="text-input" {...register('FirstName')} />
-            {errors.FirstName && <div className="error-text">{errors.FirstName.message}</div>}
-          </div>
-          <div className="form-row">
-            <label htmlFor="create-lastName">Last name</label>
-            <input id="create-lastName" className="text-input" {...register('LastName')} />
-            {errors.LastName && <div className="error-text">{errors.LastName.message}</div>}
-          </div>
-          <div className="form-row">
-            <label htmlFor="create-email">Email</label>
-            <input id="create-email" type="email" className="text-input" {...register('Email')} />
-            {errors.Email && <div className="error-text">{errors.Email.message}</div>}
-          </div>
-          <div className="form-row">
-            <label htmlFor="create-password">Password</label>
-            <input id="create-password" type="password" className="text-input" {...register('Password')} />
-            {errors.Password && <div className="error-text">{errors.Password.message}</div>}
-          </div>
-          <div className="form-row">
-            <label htmlFor="create-confirm-password">Retype password</label>
-            <input id="create-confirm-password" type="password" className="text-input" {...register('ConfirmPassword')} />
-            {errors.ConfirmPassword && <div className="error-text">{errors.ConfirmPassword.message}</div>}
-          </div>
-          <div className="form-row">
-            <label htmlFor="create-role">Role</label>
-            <select id="create-role" className="text-input" {...register('RoleId')}>
-              {roles.map((r) => (
-                <option key={r.id} value={r.id}>{r.name}</option>
-              ))}
-            </select>
-            {errors.RoleId && <div className="error-text">{errors.RoleId.message as string}</div>}
+          <div className="form-grid">
+            <div className="form-field">
+              <label htmlFor="create-firstName">First name</label>
+              <input id="create-firstName" className="text-input" {...register('FirstName')} />
+              {errors.FirstName && <div className="error-text">{errors.FirstName.message}</div>}
+            </div>
+            <div className="form-field">
+              <label htmlFor="create-lastName">Last name</label>
+              <input id="create-lastName" className="text-input" {...register('LastName')} />
+              {errors.LastName && <div className="error-text">{errors.LastName.message}</div>}
+            </div>
+            <div className="form-field">
+              <label htmlFor="create-email">Email</label>
+              <input id="create-email" type="email" className="text-input" {...register('Email')} />
+              {errors.Email && <div className="error-text">{errors.Email.message}</div>}
+            </div>
+            <div className="form-field">
+              <label htmlFor="create-password">Password</label>
+              <input id="create-password" type="password" className="text-input" {...register('Password')} />
+              {errors.Password && <div className="error-text">{errors.Password.message}</div>}
+            </div>
+            <div className="form-field">
+              <label htmlFor="create-confirm-password">Retype password</label>
+              <input id="create-confirm-password" type="password" className="text-input" {...register('ConfirmPassword')} />
+              {errors.ConfirmPassword && <div className="error-text">{errors.ConfirmPassword.message}</div>}
+            </div>
+            <div className="form-field">
+              <label htmlFor="create-role">Role</label>
+              <select id="create-role" className="text-input" {...register('RoleId')}>
+                {roles.map((r) => (
+                  <option key={r.id} value={r.id}>{r.name}</option>
+                ))}
+              </select>
+              {errors.RoleId && <div className="error-text">{errors.RoleId.message as string}</div>}
+            </div>
           </div>
           <div className="modal-footer">
 					<button type="button" className="secondary-button" onClick={onClose}>Cancel</button>
-            <button className="primary-button" type="submit" disabled={isSubmitting}>
+            <button className="primary-button" type="submit" disabled={!isValid || isSubmitting}>
               {isSubmitting ? 'Saving…' : 'Save'}
             </button>
           </div>
@@ -179,13 +185,15 @@ function EditUserModal({ initialUser, onClose, onSubmitEdit, roles }: EditProps)
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isValid },
     reset,
-    control
+    control,
+    trigger: triggerEdit
   } = useForm<UpdateFormValues>({
-    resolver: yupResolver(baseSchema),
-    mode: 'onBlur',
+    resolver: yupResolver(baseSchema, { abortEarly: false }),
+    mode: 'onChange',
     reValidateMode: 'onChange',
+    criteriaMode: 'all',
     defaultValues: {
       FirstName: initialUser.firstName,
       LastName: initialUser.lastName,
@@ -203,11 +211,12 @@ function EditUserModal({ initialUser, onClose, onSubmitEdit, roles }: EditProps)
       RoleId: initialUser.roleId,
       IsActive: initialUser.isActive
     })
+    triggerEdit()
   }, [initialUser, reset])
 
   return (
     <div className="modal-backdrop" role="dialog" aria-modal="true">
-      <div className="modal">
+      <div className="modal modal--wide">
 				<button
 					type="button"
 					className="modal-close"
@@ -224,51 +233,53 @@ function EditUserModal({ initialUser, onClose, onSubmitEdit, roles }: EditProps)
           noValidate
           onSubmit={handleSubmit((values) => onSubmitEdit(values))}
         >
-          <div className="form-row">
-            <label htmlFor="edit-firstName">First name</label>
-            <input id="edit-firstName" className="text-input" {...register('FirstName')} />
-            {errors.FirstName && <div className="error-text">{errors.FirstName.message}</div>}
-          </div>
-          <div className="form-row">
-            <label htmlFor="edit-lastName">Last name</label>
-            <input id="edit-lastName" className="text-input" {...register('LastName')} />
-            {errors.LastName && <div className="error-text">{errors.LastName.message}</div>}
-          </div>
-          <div className="form-row">
-            <label htmlFor="edit-email">Email</label>
-            <input id="edit-email" type="email" className="text-input" {...register('Email')} />
-            {errors.Email && <div className="error-text">{errors.Email.message}</div>}
-          </div>
-          <div className="form-row">
-            <label htmlFor="edit-role">Role</label>
-            <select id="edit-role" className="text-input" {...register('RoleId')}>
-              {roles.map((r) => (
-                <option key={r.id} value={r.id}>{r.name}</option>
-              ))}
-            </select>
-            {errors.RoleId && <div className="error-text">{errors.RoleId.message as string}</div>}
-          </div>
-          <div className="form-row">
-            <label htmlFor="edit-status">Status</label>
-            <Controller
-              name="IsActive"
-              control={control}
-              render={({ field: { value, onChange } }) => (
-                <select
-                  id="edit-status"
-                  className="text-input"
-                  value={value ? 'Active' : 'Inactive'}
-                  onChange={(e) => onChange(e.target.value === 'Active')}
-                >
-                  <option value="Active">Active</option>
-                  <option value="Inactive">Inactive</option>
-                </select>
-              )}
-            />
+          <div className="form-grid">
+            <div className="form-field">
+              <label htmlFor="edit-firstName">First name</label>
+              <input id="edit-firstName" className="text-input" {...register('FirstName')} />
+              {errors.FirstName && <div className="error-text">{errors.FirstName.message}</div>}
+            </div>
+            <div className="form-field">
+              <label htmlFor="edit-lastName">Last name</label>
+              <input id="edit-lastName" className="text-input" {...register('LastName')} />
+              {errors.LastName && <div className="error-text">{errors.LastName.message}</div>}
+            </div>
+            <div className="form-field">
+              <label htmlFor="edit-email">Email</label>
+              <input id="edit-email" type="email" className="text-input" {...register('Email')} />
+              {errors.Email && <div className="error-text">{errors.Email.message}</div>}
+            </div>
+            <div className="form-field">
+              <label htmlFor="edit-role">Role</label>
+              <select id="edit-role" className="text-input" {...register('RoleId')}>
+                {roles.map((r) => (
+                  <option key={r.id} value={r.id}>{r.name}</option>
+                ))}
+              </select>
+              {errors.RoleId && <div className="error-text">{errors.RoleId.message as string}</div>}
+            </div>
+            <div className="form-field">
+              <label htmlFor="edit-status">Status</label>
+              <Controller
+                name="IsActive"
+                control={control}
+                render={({ field: { value, onChange } }) => (
+                  <select
+                    id="edit-status"
+                    className="text-input"
+                    value={value ? 'Active' : 'Inactive'}
+                    onChange={(e) => onChange(e.target.value === 'Active')}
+                  >
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                  </select>
+                )}
+              />
+            </div>
           </div>
           <div className="modal-footer">
 					<button type="button" className="secondary-button" onClick={onClose}>Cancel</button>
-            <button className="primary-button" type="submit" disabled={isSubmitting}>
+            <button className="primary-button" type="submit" disabled={!isValid || isSubmitting}>
               {isSubmitting ? 'Saving…' : 'Save'}
             </button>
           </div>

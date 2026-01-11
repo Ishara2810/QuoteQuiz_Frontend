@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useMemo, useState } from 'react'
 
 type DecodedJwt = {
   sub?: string
@@ -9,6 +9,7 @@ type DecodedJwt = {
   ['http://schemas.microsoft.com/ws/2008/06/identity/claims/role']?: string | string[]
   role?: string | string[]
   roles?: string[]
+  ['FirstName']?: string
   [key: string]: unknown
 }
 
@@ -38,6 +39,7 @@ export type AuthUser = {
   userId: string | null
   email: string | null
   role: string | null
+  firstName: string | null
   expiresAt: number | null
 }
 
@@ -56,13 +58,14 @@ const EXPIRES_AT_KEY = 'auth_expiresAt'
 function extractClaimsFromToken(token: string): Omit<AuthUser, 'token' | 'expiresAt'> {
   const decoded = decodeJwt(token)
   if (!decoded) {
-    return { userId: null, email: null, role: null }
+    return { userId: null, email: null, role: null, firstName: null }
   }
   const userId =
     decoded.sub ||
     decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] ||
     null
   const email = decoded.email ?? null
+  const firstName = (decoded['FirstName'] as string | undefined) ?? null
 
   const roleClaim =
     decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] ??
@@ -76,32 +79,24 @@ function extractClaimsFromToken(token: string): Omit<AuthUser, 'token' | 'expire
     role = roleClaim
   }
 
-  return { userId, email, role }
+  return { userId, email, role, firstName }
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null)
-
-  useEffect(() => {
+  const [user, setUser] = useState<AuthUser | null>(() => {
     const token = localStorage.getItem(TOKEN_KEY)
     const expiresAtStr = localStorage.getItem(EXPIRES_AT_KEY)
     const expiresAt = expiresAtStr ? Number(expiresAtStr) : null
-    if (!token || !expiresAt) return
-
+    if (!token || !expiresAt) return null
     const now = Date.now()
     if (expiresAt <= now) {
       localStorage.removeItem(TOKEN_KEY)
       localStorage.removeItem(EXPIRES_AT_KEY)
-      return
+      return null
     }
-
     const claims = extractClaimsFromToken(token)
-    setUser({
-      token,
-      expiresAt,
-      ...claims
-    })
-  }, [])
+    return { token, expiresAt, ...claims }
+  })
 
   const login = useCallback((token: string, expiresAtIso?: string) => {
     const claims = extractClaimsFromToken(token)
