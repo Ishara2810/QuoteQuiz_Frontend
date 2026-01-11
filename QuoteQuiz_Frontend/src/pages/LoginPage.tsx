@@ -18,7 +18,7 @@ export default function LoginPage() {
   const loginMutation = useMutation({
     mutationFn: (payload: LoginRequestDto) => loginRequest(payload),
     onSuccess: (data) => {
-      auth.login(data.token, data.expiresAt)
+      auth.login(data.token, data.expiresAt, data.refreshToken ?? null)
       navigate('/quiz', { replace: true })
     }
   })
@@ -49,7 +49,7 @@ export default function LoginPage() {
     event.preventDefault()
     setTouched({ email: true, password: true })
     if (!isFormValid) return
-    loginMutation.mutate({ Email: formState.email, Password: formState.password })
+    loginMutation.mutate({ email: formState.email, password: formState.password })
   }
 
   return (

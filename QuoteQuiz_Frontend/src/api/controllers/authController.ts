@@ -1,6 +1,6 @@
-import { API_BASE_URL, AUTH_LOGIN_PATH } from '../../config'
+import { API_BASE_URL, AUTH_LOGIN_PATH, AUTH_REFRESH_PATH } from '../../config'
 import type { ApiEnvelope } from '../models/common'
-import type { LoginRequestDto, LoginResponseData } from '../models/auth'
+import type { LoginRequestDto, LoginResponseData, RefreshTokenRequestDto } from '../models/auth'
 
 export async function login(request: LoginRequestDto): Promise<LoginResponseData> {
   const response = await fetch(`${API_BASE_URL}${AUTH_LOGIN_PATH}`, {
@@ -21,6 +21,28 @@ export async function login(request: LoginRequestDto): Promise<LoginResponseData
     const message =
       (Array.isArray(envelope.errorMessages) && envelope.errorMessages.join(', ')) ||
       'Login failed'
+    throw new Error(message)
+  }
+  return envelope.data
+}
+
+export async function refreshToken(request: RefreshTokenRequestDto): Promise<LoginResponseData> {
+  const response = await fetch(`${API_BASE_URL}${AUTH_REFRESH_PATH}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(request)
+  })
+  if (!response.ok) {
+    const text = await response.text().catch(() => '')
+    throw new Error(text || `Refresh token request failed with status ${response.status}`)
+  }
+  const envelope = (await response.json()) as ApiEnvelope<LoginResponseData>
+  if (envelope.status !== 'Success') {
+    const message =
+      (Array.isArray(envelope.errorMessages) && envelope.errorMessages.join(', ')) ||
+      'Refresh token failed'
     throw new Error(message)
   }
   return envelope.data

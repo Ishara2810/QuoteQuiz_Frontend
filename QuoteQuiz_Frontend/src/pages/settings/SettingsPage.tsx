@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { getUserById, updateUserQuizMode } from '../../api/controllers/usersController'

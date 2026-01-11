@@ -1,6 +1,5 @@
 export type UserRole = string
 
-// Assuming backend uses camelCase JSON (ASP.NET default)
 export type UserDto = {
   id: string
   roleId: string
@@ -13,12 +12,12 @@ export type UserDto = {
 }
 
 export type UserPostDto = {
-  RoleId: string
-  FirstName: string
-  LastName: string
-  Email: string
-  Password: string
-  IsActive: boolean
+  roleId: string
+  firstName: string
+  lastName: string
+  email: string
+  password: string
+  isActive: boolean
 }
 
 export type CreateUserRequestDto = UserPostDto

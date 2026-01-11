@@ -27,11 +27,11 @@ export default function QuizPage() {
   function onAnswerBinary(answer: boolean, question: QuizQuestionDto) {
     if (!user?.userId) return
     const dto: SubmitAnswerDto = {
-      QuoteId: question.quoteId,
-      UserId: user.userId,
-      UserAnswer: answer ? 'Yes' : 'No',
-      BinaryQuestionAuthor: question.binaryQuestionAuthor ?? null,
-      QuizMode: question.mode
+      quoteId: question.quoteId,
+      userId: user.userId,
+      userAnswer: answer ? 'Yes' : 'No',
+      binaryQuestionAuthor: question.binaryQuestionAuthor ?? null,
+      quizMode: question.mode
     }
     submitMutation.mutate(dto)
   }
@@ -40,11 +40,11 @@ export default function QuizPage() {
     if (!selectedOption) return
     if (!user?.userId) return
     const dto: SubmitAnswerDto = {
-      QuoteId: question.quoteId,
-      UserId: user.userId,
-      UserAnswer: selectedOption,
-      BinaryQuestionAuthor: null,
-      QuizMode: question.mode
+      quoteId: question.quoteId,
+      userId: user.userId,
+      userAnswer: selectedOption,
+      binaryQuestionAuthor: null,
+      quizMode: question.mode
     }
     submitMutation.mutate(dto)
   }

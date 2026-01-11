@@ -12,3 +12,5 @@ export const QUIZ_SUBMIT_PATH = import.meta.env.VITE_QUIZ_SUBMIT_PATH ?? '/api/q
 
 export const QUIZ_ATTEMPTS_PATH = import.meta.env.VITE_QUIZ_ATTEMPTS_PATH ?? '/api/quizattempt'
 
+export const AUTH_REFRESH_PATH = import.meta.env.VITE_AUTH_REFRESH_PATH ?? '/api/auth/refresh-token'
+

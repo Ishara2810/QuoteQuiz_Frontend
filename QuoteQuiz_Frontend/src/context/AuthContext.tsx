@@ -46,7 +46,7 @@ export type AuthUser = {
 type AuthContextValue = {
   user: AuthUser | null
   isAuthenticated: boolean
-  login: (token: string, expiresAtIso?: string) => void
+  login: (token: string, expiresAtIso?: string, refreshToken?: string | null) => void
   logout: () => void
 }
 
@@ -54,6 +54,7 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
 const TOKEN_KEY = 'auth_token'
 const EXPIRES_AT_KEY = 'auth_expiresAt'
+const REFRESH_TOKEN_KEY = 'auth_refreshToken'
 
 function extractClaimsFromToken(token: string): Omit<AuthUser, 'token' | 'expiresAt'> {
   const decoded = decodeJwt(token)
@@ -98,7 +99,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { token, expiresAt, ...claims }
   })
 
-  const login = useCallback((token: string, expiresAtIso?: string) => {
+  const login = useCallback((token: string, expiresAtIso?: string, refreshToken?: string | null) => {
     const claims = extractClaimsFromToken(token)
     // Prefer server-provided expiresAt if given, else use token exp if present
     const decoded = decodeJwt(token)
@@ -115,6 +116,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     localStorage.setItem(TOKEN_KEY, token)
     localStorage.setItem(EXPIRES_AT_KEY, String(expiresAt))
+    if (refreshToken) {
+      localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken)
+    } else {
+      localStorage.removeItem(REFRESH_TOKEN_KEY)
+    }
     setUser({
       token,
       expiresAt,
@@ -125,6 +131,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = useCallback(() => {
     localStorage.removeItem(TOKEN_KEY)
     localStorage.removeItem(EXPIRES_AT_KEY)
+    localStorage.removeItem(REFRESH_TOKEN_KEY)
     setUser(null)
   }, [])
 

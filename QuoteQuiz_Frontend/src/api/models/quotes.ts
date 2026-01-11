@@ -5,8 +5,8 @@ export type QuoteDto = {
 }
 
 export type QuotePostDto = {
-  Text: string
-  Author: string
+  text: string
+  author: string
 }
 
 

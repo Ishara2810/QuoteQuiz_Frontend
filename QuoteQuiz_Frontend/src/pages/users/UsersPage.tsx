@@ -7,6 +7,7 @@ import { listRoles } from '../../api/controllers/rolesController'
 import type { CreateUserRequestDto, UpdateUserRequestDto, UserDto } from '../../api/models/users'
 import { toast } from 'react-hot-toast'
 import UsersTable from './UsersTable'
+import ConfirmDialog from '../../components/ConfirmDialog'
 import UserModal from './UserModal'
 
 export default function UsersPage() {
@@ -75,6 +76,8 @@ export default function UsersPage() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<UserDto | null>(null)
   const isCreate = editing == null
+  const [deleteTarget, setDeleteTarget] = useState<UserDto | null>(null)
+  const [statusTarget, setStatusTarget] = useState<{ user: UserDto; isActive: boolean } | null>(null)
 
   const isBusy = createMutation.isPending || updateMutation.isPending || deleteMutation.isPending
   const errorMessage = useMemo(() => {
@@ -119,13 +122,10 @@ export default function UsersPage() {
             setModalOpen(true)
           }}
           onDelete={(u) => {
-            if (!confirm(`Delete user ${u.email}?`)) return
-            deleteMutation.mutate(u.id)
+            setDeleteTarget(u)
           }}
           onChangeStatus={(u, isActive) => {
-            const target = isActive ? 'Active' : 'Inactive'
-            if (!confirm(`Change status for ${u.email} to ${target}?`)) return
-            statusMutation.mutate({ id: u.id, isActive })
+            setStatusTarget({ user: u, isActive })
           }}
         />
       )}
@@ -140,12 +140,12 @@ export default function UsersPage() {
           }}
           onSubmitCreate={(values) => {
             const payload: CreateUserRequestDto = {
-              RoleId: values.RoleId,
-              FirstName: values.FirstName,
-              LastName: values.LastName,
-              Email: values.Email,
-              Password: values.Password,
-              IsActive: true
+              roleId: values.RoleId,
+              firstName: values.FirstName,
+              lastName: values.LastName,
+              email: values.Email,
+              password: values.Password,
+              isActive: true
             }
             createMutation.mutate(payload, {
               onSuccess: () => setModalOpen(false)
@@ -163,8 +163,16 @@ export default function UsersPage() {
               if (!isBusy) setModalOpen(false)
             }}
             onSubmitEdit={(values) => {
+              const payload: UpdateUserRequestDto = {
+                roleId: values.RoleId,
+                firstName: values.FirstName,
+                lastName: values.LastName,
+                email: values.Email,
+                password: '',
+                isActive: values.IsActive
+              }
               updateMutation.mutate(
-                { id: editing.id, payload: { ...values, Password: '' } },
+                { id: editing.id, payload },
                 {
                   onSuccess: () => setModalOpen(false)
                 }
@@ -173,6 +181,54 @@ export default function UsersPage() {
           />
         )
       )}
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title="Delete user"
+        message={
+          deleteTarget ? (
+            <span>Are you sure you want to delete <strong>{deleteTarget.email}</strong>?</span>
+          ) : null
+        }
+        confirmText="Delete"
+        cancelText="Cancel"
+        busy={deleteMutation.isPending}
+        onCancel={() => {
+          if (!deleteMutation.isPending) setDeleteTarget(null)
+        }}
+        onConfirm={() => {
+          if (!deleteTarget) return
+          deleteMutation.mutate(deleteTarget.id, {
+            onSuccess: () => setDeleteTarget(null)
+          })
+        }}
+      />
+
+      <ConfirmDialog
+        open={!!statusTarget}
+        title="Change status"
+        message={
+          statusTarget ? (
+            <span>
+              Change status for <strong>{statusTarget.user.email}</strong> to{' '}
+              <strong>{statusTarget.isActive ? 'Active' : 'Inactive'}</strong>?
+            </span>
+          ) : null
+        }
+        confirmText="Change"
+        cancelText="Cancel"
+        busy={statusMutation.isPending}
+        onCancel={() => {
+          if (!statusMutation.isPending) setStatusTarget(null)
+        }}
+        onConfirm={() => {
+          if (!statusTarget) return
+          statusMutation.mutate(
+            { id: statusTarget.user.id, isActive: statusTarget.isActive },
+            { onSuccess: () => setStatusTarget(null) }
+          )
+        }}
+      />
     </div>
   )
 }

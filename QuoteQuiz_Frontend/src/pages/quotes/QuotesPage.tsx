@@ -7,6 +7,7 @@ import type { QuoteDto, QuotePostDto } from '../../api/models/quotes'
 import QuotesTable from './QuotesTable'
 import QuoteModal from './QuoteModal'
 import { toast } from 'react-hot-toast'
+import ConfirmDialog from '../../components/ConfirmDialog'
 
 export default function QuotesPage() {
   const { user } = useAuth()
@@ -54,6 +55,7 @@ export default function QuotesPage() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<QuoteDto | null>(null)
   const isCreate = editing == null
+  const [deleteTarget, setDeleteTarget] = useState<QuoteDto | null>(null)
 
   const isBusy = createMutation.isPending || updateMutation.isPending || deleteMutation.isPending
   const errorMessage = useMemo(() => {
@@ -95,8 +97,7 @@ export default function QuotesPage() {
             setModalOpen(true)
           }}
           onDelete={(q) => {
-            if (!confirm(`Delete this quote by ${q.author}?`)) return
-            deleteMutation.mutate(q.id)
+            setDeleteTarget(q)
           }}
         />
       )}
@@ -109,7 +110,7 @@ export default function QuotesPage() {
             if (!isBusy) setModalOpen(false)
           }}
           onSubmitCreate={(values) => {
-            createMutation.mutate(values, {
+            createMutation.mutate({ text: values.Text, author: values.Author }, {
               onSuccess: () => setModalOpen(false)
             })
           }}
@@ -125,7 +126,7 @@ export default function QuotesPage() {
             }}
             onSubmitEdit={(values) => {
               updateMutation.mutate(
-                { id: editing.id, payload: values },
+                { id: editing.id, payload: { text: values.Text, author: values.Author } },
                 {
                   onSuccess: () => setModalOpen(false)
                 }
@@ -134,6 +135,30 @@ export default function QuotesPage() {
           />
         )
       )}
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title="Delete quote"
+        message={
+          deleteTarget ? (
+            <span>
+              Are you sure you want to delete the quote by <strong>{deleteTarget.author}</strong>?
+            </span>
+          ) : null
+        }
+        confirmText="Delete"
+        cancelText="Cancel"
+        busy={deleteMutation.isPending}
+        onCancel={() => {
+          if (!deleteMutation.isPending) setDeleteTarget(null)
+        }}
+        onConfirm={() => {
+          if (!deleteTarget) return
+          deleteMutation.mutate(deleteTarget.id, {
+            onSuccess: () => setDeleteTarget(null)
+          })
+        }}
+      />
     </div>
   )
 }

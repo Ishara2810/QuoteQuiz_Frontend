@@ -10,11 +10,11 @@ import type { UserDto as QuizUserDto } from '../models/users'
 import type { QuoteDto as QuizQuoteDto } from '../models/quotes'
 
 export type SubmitAnswerDto = {
-  QuoteId: string
-  UserId: string
-  UserAnswer: string
-  BinaryQuestionAuthor?: string | null
-  QuizMode: number
+  quoteId: string
+  userId: string
+  userAnswer: string
+  binaryQuestionAuthor?: string | null
+  quizMode: number
 }
 
 export type QuizAttemptDto = {

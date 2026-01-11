@@ -123,17 +123,17 @@ export default function AchievementsTable({ attempts }: AchievementsTableProps) 
             <tr>
               <th>
                 <button className="table-sort" onClick={() => toggleSort('name')}>
-                  User name {sortKey === 'name' ? (sortDir === 'asc' ? '▲' : '▼') : ''}
+                  User Name {sortKey === 'name' ? (sortDir === 'asc' ? '▲' : '▼') : ''}
                 </button>
               </th>
               <th>
                 <button className="table-sort" onClick={() => toggleSort('email')}>
-                  Email {sortKey === 'email' ? (sortDir === 'asc' ? '▲' : '▼') : ''}
+                  User Email {sortKey === 'email' ? (sortDir === 'asc' ? '▲' : '▼') : ''}
                 </button>
               </th>
               <th>
                 <button className="table-sort" onClick={() => toggleSort('quote')}>
-                  Quote Text {sortKey === 'quote' ? (sortDir === 'asc' ? '▲' : '▼') : ''}
+                  Quote {sortKey === 'quote' ? (sortDir === 'asc' ? '▲' : '▼') : ''}
                 </button>
               </th>
               <th>

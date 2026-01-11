@@ -1,19 +1,10 @@
 import { API_BASE_URL, ROLES_PATH } from '../../config'
 import type { ApiEnvelope } from '../models/common'
 import type { RoleDto } from '../models/roles'
-
-function authHeaders(token: string) {
-  return {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${token}`
-  }
-}
+import { authFetch } from '../http'
 
 export async function listRoles(token: string): Promise<RoleDto[]> {
-  const response = await fetch(`${API_BASE_URL}${ROLES_PATH}`, {
-    method: 'GET',
-    headers: authHeaders(token)
-  })
+  const response = await authFetch(`${API_BASE_URL}${ROLES_PATH}`, { method: 'GET' }, token)
   if (!response.ok) {
     throw new Error(`Failed to load roles (${response.status})`)
   }

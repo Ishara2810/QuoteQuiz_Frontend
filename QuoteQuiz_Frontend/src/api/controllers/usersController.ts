@@ -5,19 +5,10 @@ import type {
   UpdateUserRequestDto,
   UserDto
 } from '../models/users'
-
-function authHeaders(token: string) {
-  return {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${token}`
-  }
-}
+import { authFetch } from '../http'
 
 export async function listUsers(token: string): Promise<UserDto[]> {
-  const response = await fetch(`${API_BASE_URL}${USERS_PATH}`, {
-    method: 'GET',
-    headers: authHeaders(token)
-  })
+  const response = await authFetch(`${API_BASE_URL}${USERS_PATH}`, { method: 'GET' }, token)
   if (!response.ok) {
     throw new Error(`Failed to load users (${response.status})`)
   }
@@ -29,11 +20,11 @@ export async function listUsers(token: string): Promise<UserDto[]> {
 }
 
 export async function createUser(token: string, payload: CreateUserRequestDto): Promise<UserDto> {
-  const response = await fetch(`${API_BASE_URL}${USERS_PATH}`, {
+  const response = await authFetch(`${API_BASE_URL}${USERS_PATH}`, {
     method: 'POST',
-    headers: authHeaders(token),
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
-  })
+  }, token)
   if (!response.ok) {
     const text = await response.text().catch(() => '')
     throw new Error(text || `Failed to create user (${response.status})`)
@@ -50,11 +41,11 @@ export async function updateUser(
   id: string,
   payload: UpdateUserRequestDto
 ): Promise<UserDto> {
-  const response = await fetch(`${API_BASE_URL}${USERS_PATH}/${encodeURIComponent(id)}`, {
+  const response = await authFetch(`${API_BASE_URL}${USERS_PATH}/${encodeURIComponent(id)}`, {
     method: 'PUT',
-    headers: authHeaders(token),
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
-  })
+  }, token)
   if (!response.ok) {
     const text = await response.text().catch(() => '')
     throw new Error(text || `Failed to update user (${response.status})`)
@@ -67,36 +58,33 @@ export async function updateUser(
 }
 
 export async function deleteUser(token: string, id: string): Promise<void> {
-  const response = await fetch(`${API_BASE_URL}${USERS_PATH}/${encodeURIComponent(id)}`, {
-    method: 'DELETE',
-    headers: authHeaders(token)
-  })
+  const response = await authFetch(`${API_BASE_URL}${USERS_PATH}/${encodeURIComponent(id)}`, {
+    method: 'DELETE'
+  }, token)
   if (!response.ok) {
     const text = await response.text().catch(() => '')
     throw new Error(text || `Failed to delete user (${response.status})`)
   }
 }
 
-// Optional convenience: update only status if your backend supports it.
 export async function updateUserStatus(token: string, id: string, isActive: boolean): Promise<void> {
-  const response = await fetch(`${API_BASE_URL}${USERS_PATH}/update-status/${encodeURIComponent(id)}`, {
+  const response = await authFetch(`${API_BASE_URL}${USERS_PATH}/update-status/${encodeURIComponent(id)}`, {
     method: 'PATCH',
-    headers: authHeaders(token),
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ IsActive: isActive })
-  })
+  }, token)
   if (!response.ok) {
     const text = await response.text().catch(() => '')
     throw new Error(text || `Failed to update user status (${response.status})`)
   }
-  // Backend returns envelope with null data on success; nothing to return
 }
 
 export async function updateUserQuizMode(token: string, id: string, quizMode: number): Promise<void> {
-  const response = await fetch(`${API_BASE_URL}${USERS_PATH}/update-quiz-mode/${encodeURIComponent(id)}`, {
+  const response = await authFetch(`${API_BASE_URL}${USERS_PATH}/update-quiz-mode/${encodeURIComponent(id)}`, {
     method: 'PATCH',
-    headers: authHeaders(token),
-    body: JSON.stringify({ QuizMode: quizMode })
-  })
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ quizMode })
+  }, token)
   if (!response.ok) {
     const text = await response.text().catch(() => '')
     throw new Error(text || `Failed to update quiz mode (${response.status})`)
@@ -104,10 +92,9 @@ export async function updateUserQuizMode(token: string, id: string, quizMode: nu
 }
 
 export async function getUserById(token: string, id: string): Promise<UserDto> {
-  const response = await fetch(`${API_BASE_URL}${USERS_PATH}/${encodeURIComponent(id)}`, {
-    method: 'GET',
-    headers: authHeaders(token)
-  })
+  const response = await authFetch(`${API_BASE_URL}${USERS_PATH}/${encodeURIComponent(id)}`, {
+    method: 'GET'
+  }, token)
   if (!response.ok) {
     const text = await response.text().catch(() => '')
     throw new Error(text || `Failed to load user (${response.status})`)

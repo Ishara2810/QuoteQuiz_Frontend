@@ -488,6 +488,7 @@
   justify-content: flex-end;
   gap: 8px;
   margin-top: 8px;
+  padding: 0 20px 20px 20px; /* ensure space at bottom so buttons aren't cut off */
 }
 
 .quiz-actions {
