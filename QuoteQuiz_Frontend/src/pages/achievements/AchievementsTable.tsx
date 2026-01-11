@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { QuizAttemptDto } from '../../api/models/quiz'
+import Pagination from '../../components/Pagination'
 
 export type AchievementsTableProps = {
   attempts: QuizAttemptDto[]
@@ -14,6 +15,8 @@ export default function AchievementsTable({ attempts }: AchievementsTableProps) 
   const [achievement, setAchievement] = useState<'All' | 'Correct' | 'Wrong'>('All')
   const [sortKey, setSortKey] = useState<SortKey>('name')
   const [sortDir, setSortDir] = useState<SortDir>('asc')
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
 
   const filteredSorted = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -84,6 +87,15 @@ export default function AchievementsTable({ attempts }: AchievementsTableProps) 
     }
   }
 
+  const total = filteredSorted.length
+  const pageCount = Math.max(1, Math.ceil(total / pageSize))
+  const currentPage = Math.min(page, pageCount)
+  const start = (currentPage - 1) * pageSize
+  const pageItems = filteredSorted.slice(start, start + pageSize)
+  if (page > 1 && start >= total && total > 0) {
+    setPage(1)
+  }
+
   return (
     <div className="users-table achievements-table">
       <div className="table-toolbar">
@@ -145,7 +157,7 @@ export default function AchievementsTable({ attempts }: AchievementsTableProps) 
             </tr>
           </thead>
           <tbody>
-            {filteredSorted.map((a) => (
+            {pageItems.map((a) => (
               <tr key={a.id}>
                 <td>{`${a.user.firstName} ${a.user.lastName}`.trim()}</td>
                 <td>{a.user.email}</td>
@@ -170,6 +182,16 @@ export default function AchievementsTable({ attempts }: AchievementsTableProps) 
           </tbody>
         </table>
       </div>
+      <Pagination
+        page={currentPage}
+        pageSize={pageSize}
+        total={total}
+        onPageChange={setPage}
+        onPageSizeChange={(s) => {
+          setPageSize(s)
+          setPage(1)
+        }}
+      />
     </div>
   )
 }

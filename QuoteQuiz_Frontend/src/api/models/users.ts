@@ -9,6 +9,7 @@ export type UserDto = {
   lastName: string
   email: string
   isActive: boolean
+  quizMode?: number
 }
 
 export type UserPostDto = {

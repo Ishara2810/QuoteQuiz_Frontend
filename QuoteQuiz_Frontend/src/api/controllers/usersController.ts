@@ -91,4 +91,32 @@ export async function updateUserStatus(token: string, id: string, isActive: bool
   // Backend returns envelope with null data on success; nothing to return
 }
 
+export async function updateUserQuizMode(token: string, id: string, quizMode: number): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}${USERS_PATH}/update-quiz-mode/${encodeURIComponent(id)}`, {
+    method: 'PATCH',
+    headers: authHeaders(token),
+    body: JSON.stringify({ QuizMode: quizMode })
+  })
+  if (!response.ok) {
+    const text = await response.text().catch(() => '')
+    throw new Error(text || `Failed to update quiz mode (${response.status})`)
+  }
+}
+
+export async function getUserById(token: string, id: string): Promise<UserDto> {
+  const response = await fetch(`${API_BASE_URL}${USERS_PATH}/${encodeURIComponent(id)}`, {
+    method: 'GET',
+    headers: authHeaders(token)
+  })
+  if (!response.ok) {
+    const text = await response.text().catch(() => '')
+    throw new Error(text || `Failed to load user (${response.status})`)
+  }
+  const envelope = (await response.json()) as ApiEnvelope<UserDto>
+  if (envelope.status !== 'Success') {
+    throw new Error('Failed to load user')
+  }
+  return envelope.data
+}
+
 

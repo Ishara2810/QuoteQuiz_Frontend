@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { QuoteDto } from '../../api/models/quotes'
+import Pagination from '../../components/Pagination'
 
 export type QuotesTableProps = {
   quotes: QuoteDto[]
@@ -14,6 +15,8 @@ export default function QuotesTable({ quotes, onEdit, onDelete }: QuotesTablePro
   const [query, setQuery] = useState('')
   const [sortKey, setSortKey] = useState<SortKey>('text')
   const [sortDir, setSortDir] = useState<SortDir>('asc')
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
 
   const filteredSorted = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -38,6 +41,15 @@ export default function QuotesTable({ quotes, onEdit, onDelete }: QuotesTablePro
       setSortKey(key)
       setSortDir('asc')
     }
+  }
+
+  const total = filteredSorted.length
+  const pageCount = Math.max(1, Math.ceil(total / pageSize))
+  const currentPage = Math.min(page, pageCount)
+  const start = (currentPage - 1) * pageSize
+  const pageItems = filteredSorted.slice(start, start + pageSize)
+  if (page > 1 && start >= total && total > 0) {
+    setPage(1)
   }
 
   return (
@@ -69,7 +81,7 @@ export default function QuotesTable({ quotes, onEdit, onDelete }: QuotesTablePro
             </tr>
           </thead>
           <tbody>
-            {filteredSorted.map((q) => (
+            {pageItems.map((q) => (
               <tr key={q.id}>
                 <td>{q.text}</td>
                 <td>{q.author}</td>
@@ -105,6 +117,16 @@ export default function QuotesTable({ quotes, onEdit, onDelete }: QuotesTablePro
           </tbody>
         </table>
       </div>
+      <Pagination
+        page={currentPage}
+        pageSize={pageSize}
+        total={total}
+        onPageChange={setPage}
+        onPageSizeChange={(s) => {
+          setPageSize(s)
+          setPage(1)
+        }}
+      />
     </div>
   )
 }

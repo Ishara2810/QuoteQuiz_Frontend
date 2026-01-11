@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import type { UserDto } from '../../api/models/users'
 import type { RoleDto } from '../../api/models/roles'
+import Pagination from '../../components/Pagination'
 
 export type UsersTableProps = {
   users: UserDto[]
@@ -18,6 +19,8 @@ export default function UsersTable({ users, roles, onEdit, onDelete, onChangeSta
   const [role, setRole] = useState<string | 'All'>('All')
   const [sortKey, setSortKey] = useState<SortKey>('name')
   const [sortDir, setSortDir] = useState<SortDir>('asc')
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
 
   const filteredSorted = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -61,6 +64,14 @@ export default function UsersTable({ users, roles, onEdit, onDelete, onChangeSta
       setSortDir('asc')
     }
   }
+
+  const total = filteredSorted.length
+  const pageCount = Math.max(1, Math.ceil(total / pageSize))
+  const currentPage = Math.min(page, pageCount)
+  const start = (currentPage - 1) * pageSize
+  const pageItems = filteredSorted.slice(start, start + pageSize)
+
+  if (page > 1 && start >= total && total > 0) setPage(1)
 
   return (
     <div className="users-table">
@@ -112,7 +123,7 @@ export default function UsersTable({ users, roles, onEdit, onDelete, onChangeSta
             </tr>
           </thead>
           <tbody>
-            {filteredSorted.map((u) => (
+            {pageItems.map((u) => (
               <tr key={u.id}>
                 <td>{`${u.firstName} ${u.lastName}`.trim()}</td>
                 <td>{u.email}</td>
@@ -160,6 +171,16 @@ export default function UsersTable({ users, roles, onEdit, onDelete, onChangeSta
           </tbody>
         </table>
       </div>
+      <Pagination
+        page={currentPage}
+        pageSize={pageSize}
+        total={total}
+        onPageChange={setPage}
+        onPageSizeChange={(s) => {
+          setPageSize(s)
+          setPage(1)
+        }}
+      />
     </div>
   )
 }

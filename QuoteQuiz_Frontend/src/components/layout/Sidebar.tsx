@@ -11,6 +11,12 @@ export default function Sidebar() {
           Quiz
         </NavLink>
         <NavLink
+          to="/settings"
+          className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
+        >
+          Settings
+        </NavLink>
+        <NavLink
           to="/achievements"
           className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
         >
